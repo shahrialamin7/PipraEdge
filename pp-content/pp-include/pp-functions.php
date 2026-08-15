@@ -3284,18 +3284,20 @@
                                 const deadline = '.$pv_deadline.';
                                 function fmt(s){ var m=Math.floor(s/60), sc=s%60; return (m<10?"0":"")+m+":"+(sc<10?"0":"")+sc; }
                                 function success(d){
+                                    try { localStorage.removeItem("pp_pv_step"); localStorage.removeItem("pp_pv_num"); } catch(e){}
                                     window.location.href = (d && d.redirect) ? d.redirect : window.location.href;
                                 }
-                                if (!deadline) {
-                                    if (timerEl) timerEl.textContent = "--:--";
-                                } else {
+                                function startTimer(){
+                                    if (!deadline) { if (timerEl) timerEl.textContent = "--:--"; return; }
                                     let remain = Math.max(0, deadline - Math.floor(Date.now()/1000));
                                     if (timerEl) timerEl.textContent = fmt(remain);
-                                    const pvInterval = setInterval(function(){
+                                    pvInterval = setInterval(function(){
                                         remain--;
                                         if (remain <= 0) {
-                                            clearInterval(pvInterval);
+                                            if (pvInterval) { clearInterval(pvInterval); pvInterval = null; }
+                                            if (pollIv) { clearInterval(pollIv); pollIv = null; }
                                             if (timerEl) timerEl.textContent = "00:00";
+                                            try { localStorage.removeItem("pp_pv_step"); } catch(e){}
                                             const fd = new FormData();
                                             fd.append("action-v2", "phone-cancel");
                                             fd.append("csrf_token", "'.htmlspecialchars((string)($_SESSION['csrf_token'] ?? '')).'");
@@ -3314,7 +3316,9 @@
                                 const step1 = document.getElementById("pv-form-set");
                                 const step2 = document.getElementById("pv-step-2");
                                 let pollIv = null;
+                                let pvInterval = null;
                                 function startPolling(){
+                                    if (pollIv) { clearInterval(pollIv); pollIv = null; }
                                     pollIv = setInterval(function(){
                                         const fd = new FormData();
                                         fd.append("action-v2", "phone-poll");
@@ -3330,6 +3334,47 @@
                                         .catch(function(){});
                                     }, '.(defined("PHONE_VERIFY_POLL_INTERVAL") ? PHONE_VERIFY_POLL_INTERVAL : 4).' * 1000);
                                 }
+                                function goToStep2(){
+                                    if (instr) instr.style.display = "";
+                                    if (step1) step1.style.display = "none";
+                                    if (step2) step2.style.display = "";
+                                    startTimer();
+                                    startPolling();
+                                }
+                                function goToStep1(){
+                                    if (pollIv) { clearInterval(pollIv); pollIv = null; }
+                                    if (pvInterval) { clearInterval(pvInterval); pvInterval = null; }
+                                    if (step2) step2.style.display = "none";
+                                    if (step1) step1.style.display = "";
+                                    if (fbWrap) fbWrap.style.display = "none";
+                                    if (fbTimer) clearTimeout(fbTimer);
+                                    try { localStorage.setItem("pp_pv_step", "1"); } catch(e){}
+                                }
+                                const navCancel = document.querySelector(".hz-nav-cancel");
+                                if (navCancel) {
+                                    navCancel.onclick = function(e){
+                                        if (step2 && step2.style.display !== "none") {
+                                            e.preventDefault();
+                                            goToStep1();
+                                            return false;
+                                        }
+                                        window.location.href = "'.pp_checkout_address().'";
+                                    };
+                                }
+                                (function(){
+                                    let savedNum = "";
+                                    try { savedNum = localStorage.getItem("pp_pv_num") || ""; } catch(e){}
+                                    if (phoneInput && savedNum) phoneInput.value = savedNum;
+                                    let savedStep = "";
+                                    try { savedStep = localStorage.getItem("pp_pv_step") || ""; } catch(e){}
+                                    const alive = !!deadline && (Math.floor(Date.now()/1000) < deadline);
+                                    if (savedStep === "2" && alive) {
+                                        goToStep2();
+                                    } else {
+                                        if (step2) step2.style.display = "none";
+                                        if (step1) step1.style.display = "";
+                                    }
+                                })();
                                 form.addEventListener("submit", function(e) {
                                     e.preventDefault();
                                     const val = (phoneInput.value || "").replace(/\\D/g, "");
@@ -3350,7 +3395,9 @@
                                             if (instr) instr.style.display = "";
                                             if (step1) step1.style.display = "none";
                                             if (step2) step2.style.display = "";
+                                            startTimer();
                                             startPolling();
+                                            try { localStorage.setItem("pp_pv_num", norm); localStorage.setItem("pp_pv_step", "2"); } catch(e){}
                                         }
                                         else if(data.status === "false") { failed(data.title, data.message); }
                                         else { failed("Unexpected Response", "Please try again later."); }
@@ -3563,7 +3610,7 @@
                                         const mobileWrapper = form.querySelector(`.form-group[style*="display: none"]`);
                                         const submitBtn = form.querySelector(".payment-form-btn");
 
-                                        form.addEventListener("submit", function(e) {
+                                form.addEventListener("submit", function(e) {
                                             e.preventDefault();
 
                                             const formData = new FormData(form);
