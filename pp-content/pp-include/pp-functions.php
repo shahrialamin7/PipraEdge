@@ -1195,7 +1195,8 @@
             $md['phone_session_start'] = getCurrentDatetime('Y-m-d H:i:s');
         }
         updateData($db_prefix.'transaction', ['metadata', 'updated_date'], [json_encode($md), getCurrentDatetime('Y-m-d H:i:s')], 'id = "'.$txn['id'].'"');
-        echo json_encode(['status' => "true", 'title' => 'OK', 'message' => 'Polling started.']);
+        $pv_set_deadline = $md['phone_session_start'] ? (strtotime($md['phone_session_start']) + PHONE_VERIFY_SESSION_MINUTES * 60) : 0;
+        echo json_encode(['status' => "true", 'title' => 'OK', 'message' => 'Polling started.', 'deadline' => $pv_set_deadline]);
     }
 
     function pp_handle_phone_poll() {
@@ -3220,18 +3221,14 @@
                     }
 
                     if ($pv_avType === 'phone') {
-                        // stamp session start on first gateway-open (no reset on reload)
+                        // session window starts on step-1 submit (verification begin), not on page open
                         $pv_session_start = null;
                         $pv_txn_ref = $data['transaction']['ref'] ?? '';
                         if ($pv_txn_ref) {
                             $pv_txn_res = json_decode(getData($db_prefix.'transaction', 'WHERE ref = :ref', '* FROM', [':ref' => $pv_txn_ref]), true);
                             if ($pv_txn_res['status'] == true) {
                                 $pv_md = json_decode($pv_txn_res['response'][0]['metadata'] ?? '{}', true) ?: [];
-                                if (empty($pv_md['phone_session_start'])) {
-                                    $pv_md['phone_session_start'] = getCurrentDatetime('Y-m-d H:i:s');
-                                    updateData($db_prefix.'transaction', ['metadata', 'updated_date'], [json_encode($pv_md), getCurrentDatetime('Y-m-d H:i:s')], 'id = "'.$pv_txn_res['response'][0]['id'].'"');
-                                }
-                                $pv_session_start = $pv_md['phone_session_start'];
+                                $pv_session_start = $pv_md['phone_session_start'] ?? null;
                             }
                         }
                         $pv_deadline = $pv_session_start ? (strtotime($pv_session_start) + PHONE_VERIFY_SESSION_MINUTES * 60) : 0;
@@ -3281,7 +3278,7 @@
                                 const phoneInput = form.querySelector("input[name=\'mobile_number\']");
                                 const timerEl = document.getElementById("phone-session-timer");
 
-                                const deadline = '.$pv_deadline.';
+                                let deadline = '.$pv_deadline.';
                                 function fmt(s){ var m=Math.floor(s/60), sc=s%60; return (m<10?"0":"")+m+":"+(sc<10?"0":"")+sc; }
                                 function success(d){
                                     try { localStorage.removeItem("pp_pv_step"); localStorage.removeItem("pp_pv_num"); } catch(e){}
@@ -3395,6 +3392,7 @@
                                             if (instr) instr.style.display = "";
                                             if (step1) step1.style.display = "none";
                                             if (step2) step2.style.display = "";
+                                            if (data.deadline) deadline = data.deadline;
                                             startTimer();
                                             startPolling();
                                             try { localStorage.setItem("pp_pv_num", norm); localStorage.setItem("pp_pv_step", "2"); } catch(e){}
