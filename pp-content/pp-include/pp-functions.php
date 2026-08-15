@@ -3256,12 +3256,12 @@
                         <div id="pv-step-2" style="display:none;">
                             <div class="alert alert-info mt-2 mb-0 py-2" id="phone-session-timer-wrap">
                                 Verification window closes in <span id="phone-session-timer">--:--</span>
+                                <div id="pv-waiting" class="mt-1">Waiting for payment — polling your number from SMS…</div>
                             </div>
-                            <div class="mt-2" id="pv-waiting">Waiting for payment — polling your number from SMS…</div>
                         </div>
 
                         <div id="pv-fallback" style="display:none; margin-top:12px; text-align:center; font-size:13px;">
-                            Payment not detected automatically?
+                            Taking too much time?
                             <span id="pv-fallback-link" style="color:var(--hz-primary); cursor:pointer; font-weight:600;">Enter Transaction ID</span>
                         </div>
                         <div id="pv-fallback-form" class="hz-form-card" style="display:none; margin-top:12px;">
