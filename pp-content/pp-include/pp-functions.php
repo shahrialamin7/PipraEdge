@@ -3251,9 +3251,10 @@
                         </form>
 
                         <div id="pv-step-2" style="display:none;">
-                            <div class="alert alert-info mt-2 mb-0 py-2" id="phone-session-timer-wrap">
-                                Verification window closes in <span id="phone-session-timer">--:--</span>
-                                <div id="pv-waiting" class="mt-1">Waiting for payment — polling your number from SMS…</div>
+                            <div id="phone-session-timer-wrap" style="display:flex;align-items:center;gap:10px;background:var(--gp-lt,#e7f1ff);border:1px solid #c6dcff;border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.4;">
+                                <span class="spinner-border spinner-border-sm" style="width:14px;height:14px;" aria-hidden="true"></span>
+                                <span id="pv-waiting">Waiting for payment — polling your number from SMS…</span>
+                                <span style="margin-left:auto;white-space:nowrap;">Verification window closes in <b id="phone-session-timer">--:--</b></span>
                             </div>
                         </div>
 
