@@ -958,6 +958,10 @@
         }
         $start = $metadata['phone_session_start'] ?? $txn['created_date'] ?? null;
         if ($start && (time() - strtotime($start)) > (PHONE_VERIFY_SESSION_MINUTES * 60)) {
+            // ponytail: server-authoritative expiry so DB status shows 'expired' even if client JS never fired
+            if ($txn['status'] === 'initiated') {
+                updateData($db_prefix.'transaction', ['status', 'updated_date'], ['expired', getCurrentDatetime('Y-m-d H:i:s')], 'id = "'.$txn['id'].'"');
+            }
             return ['status' => "false", 'code' => 'expired', 'title' => 'Session Expired', 'message' => 'The verification window has expired. Please create a new payment request.'];
         }
 
@@ -3232,6 +3236,12 @@
                             }
                         }
                         $pv_deadline = $pv_session_start ? (strtotime($pv_session_start) + PHONE_VERIFY_SESSION_MINUTES * 60) : 0;
+
+                        // ponytail: surface expired status visibly instead of silently resetting to the form
+                        $pv_txn_status = $pv_txn_res['response'][0]['status'] ?? '';
+                        if ($pv_txn_status === 'expired') {
+                            echo '<div class="pp-alert pp-alert-danger" style="margin-bottom:16px;">Verification window expired. Please create a new payment request.</div>';
+                        }
 
                         echo '
                         <form class="payment-form-submit" method="POST" enctype="multipart/form-data" id="pv-form-set">

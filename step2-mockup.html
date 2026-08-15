@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone Verify — Step 2 (rough mockup)</title>
+<style>
+  :root{
+    --hz-primary:#0d6efd; --gp:#0d6efd; --gp-lt:#e7f1ff; --muted:#6b7280;
+    --r:12px; --card:#fff; --border:#e5e7eb; --text:#1f2937;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:#f3f4f6;color:var(--text);padding:24px;display:flex;justify-content:center}
+  .gw{width:100%;max-width:420px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .alert{background:var(--gp-lt);border:1px solid #c6dcff;border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.5}
+  .alert b{font-weight:700}
+  .alert .wait{margin-top:6px;color:#1d4ed8;font-weight:600}
+  .muted{color:var(--muted);font-size:13px;text-align:center;margin-top:14px}
+  .muted a{color:var(--hz-primary);font-weight:600;cursor:pointer}
+  .hz-form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .hz-form-card .form-group{margin-bottom:12px}
+  .form-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+  .form-control{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px}
+  .btn{width:100%;background:var(--hz-primary);color:#fff;border:0;border-radius:8px;padding:11px;font-size:14px;font-weight:600;cursor:pointer}
+  .tag{display:inline-block;font-size:11px;color:#9ca3af;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="gw">
+
+  <div class="tag">zenith-core · phone-verify gateway · step 2</div>
+
+  <!-- Step 2: timer + waiting in SAME container -->
+  <div class="card">
+    <div class="alert" id="phone-session-timer-wrap">
+      Verification window closes in <b>09:42</b>
+      <div class="wait" id="pv-waiting">Waiting for payment — polling your number from SMS…</div>
+    </div>
+  </div>
+
+  <!-- Fallback link (appears after 30s) -->
+  <div class="muted">
+    Payment not detected automatically?
+    <a>Enter Transaction ID</a>
+  </div>
+
+  <!-- Fallback form: SEPARATE card, like QR gateway page UI -->
+  <div class="hz-form-card" id="pv-fallback-form">
+    <div class="form-group">
+      <label class="form-label">Transaction ID</label>
+      <input class="form-control" placeholder="e.g. 8F7K3M2XQ9" maxlength="50">
+    </div>
+    <button class="btn">Verify Payment</button>
+  </div>
+
+</div>
+</body>
+</html>
