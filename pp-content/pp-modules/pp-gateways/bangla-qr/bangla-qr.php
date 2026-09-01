@@ -424,7 +424,7 @@ function bnqr_handle_verify($data = null) {
                 $code = $results[$job['id']] ?? 0;
                 if ($code !== 200) {
                     $columns = ['ref', 'brand_id', 'payload', 'url', 'created_date', 'updated_date'];
-                    $values = [rand(), $brand['brand_id'], json_encode($ipnData, JSON_UNCAPTURED_UNICODE), $transaction['webhook_url'], getCurrentDatetime('Y-m-d H:i:s'), getCurrentDatetime('Y-m-d H:i:s')];
+                    $values = [rand(), $brand['brand_id'], json_encode($ipnData, JSON_UNESCAPED_UNICODE), $transaction['webhook_url'], getCurrentDatetime('Y-m-d H:i:s'), getCurrentDatetime('Y-m-d H:i:s')];
                     insertData($db_prefix.'webhook_log', $columns, $values);
                 }
             }
