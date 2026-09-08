@@ -57,18 +57,30 @@ Built for **PipraPay 3.0.0+** (PHP 8.1+, MySQL InnoDB, HTTPS).
 - **Zenith Core theme** — mobile-first checkout/qr-gateway/status/receipt/payment-link, language switcher, session timeout, gateway ordering
 - **Admin QR tools** — jsQR in-browser decode + hex picker on the gateway edit screen
 
-## 🚀 Install
+## 🚀 Install (shared hosting friendly — no SSH needed)
+
+```text
+1. Download this repo as ZIP (Code → Download ZIP) and extract it.
+   Inside you will find:  pp-content/  +  gateways_data.sql
+2. Hosting File Manager → open your PipraPay directory →
+   upload/merge the extracted pp-content/ into PipraPay's own pp-content/
+   (merge, don't replace the whole folder).
+   ⚠️ Backup first: pp-include/pp-adapter.php and pp-include/pp-functions.php
+   WILL be overwritten (the bundle patches core files — re-apply after any
+   PipraPay core update).
+3. phpMyAdmin → your PipraPay database → Import → gateways_data.sql
+   (creates the pp_gateways_data slot table — run AFTER the base install).
+4. PipraPay Dashboard → Themes → Zenith Core → Activate.
+5. PipraPay Dashboard → Gateways → Bangla QR → Add → upload QR,
+   select Provider, save settings.
+```
+
+InshaAllah — all complete. ✅
 
 ```bash
-# 1. DB — run AFTER the PipraPay base db.sql
+# Same steps via SSH (alternative):
 mysql -u user -p db < gateways_data.sql
-# or: mysql < pp-content/pp-install/db.sql then gateways_data.sql
-
-# 2. Files — merge pp-content into your PipraPay root
 cp -r pp-content/* /path/to/piprapay/pp-content/
-
-# 3. Dashboard → Gateways → Bangla QR → upload QR, select Provider, save
-# 4. Dashboard → Themes → Zenith Core → Activate
 ```
 
 ## ⚙️ Gateway Settings
